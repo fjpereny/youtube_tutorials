@@ -12,6 +12,7 @@ class ScreenCaptureAgent:
         self.img = None
         self.capture_process = None
         self.fps = None
+        self.enable_cv_preview = True
 
         self.w, self.h = pyautogui.size()
         print("Screen Resolution: " + "w: " + str(self.w) + " h:" + str(self.h))
@@ -26,12 +27,28 @@ class ScreenCaptureAgent:
             while True:
                 self.img = sct.grab(monitor=self.monitor)
                 self.img = np.array(self.img)
-                small = cv.resize(self.img, (0, 0), fx=0.5, fy=0.5)
-                cv.imshow("Computer Vision", small)
+
+                if self.enable_cv_preview:
+                    small = cv.resize(self.img, (0, 0), fx=0.5, fy=0.5)
+                    if self.fps is None:
+                        fps_text = ""
+                    else:
+                        fps_text = f'FPS: {self.fps:.2f}'
+                    cv.putText(
+                        small, 
+                        fps_text, 
+                        (25, 50), 
+                        cv.FONT_HERSHEY_DUPLEX,
+                        1,
+                        (255, 0, 255),
+                        1,
+                        cv.LINE_AA)
+                    cv.imshow("Computer Vision", small)
 
                 elapsed_time = time.time() - fps_report_time
                 if elapsed_time >= fps_report_delay:
-                    print(f'{bcolors.PINK}FPS: {(n_frames / elapsed_time):.2f}{bcolors.ENDC}')
+                    self.fps = n_frames / elapsed_time
+                    print(f'{bcolors.PINK}FPS: {self.fps:.2f}{bcolors.ENDC}')
                     fps_report_time = time.time()
                     n_frames = 1
                 n_frames += 1
