@@ -84,7 +84,7 @@ if __name__ == "__main__":
             break
         elif user_input == 'run' or user_input == 'r':
             if screen_agent.capture_process is not None:
-                print("{bcolors.YELLOW}WARNING:{bcolors.ENDC} A capture process is already running!")
+                print(f"{bcolors.YELLOW}WARNING:{bcolors.ENDC} A capture process is already running!")
                 continue
             screen_agent.capture_process = multiprocessing.Process(
                 target=screen_agent.capture_screen, 
