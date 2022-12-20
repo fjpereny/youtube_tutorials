@@ -14,6 +14,9 @@ class ScreenCaptureAgent:
         self.fps = None
         self.enable_cv_preview = True
 
+        self.top_left = (514, 771)
+        self.bottom_right = (635, 788)
+
         self.w, self.h = pyautogui.size()
         print("Screen Resolution: " + "w: " + str(self.w) + " h:" + str(self.h))
         self.monitor = {"top": 0, "left": 0, "width": self.w, "height": self.h}
@@ -28,15 +31,10 @@ class ScreenCaptureAgent:
                 self.img = sct.grab(monitor=self.monitor)
                 self.img = np.array(self.img)
 
-                self.img_health = self.img[10:100, 30:400]
-                cv.circle(
-                    self.img_health,
-                    (10, 10),
-                    5,
-                    (0, 255, 0),
-                    1,
-                    cv.LINE_AA
-                )
+                self.img_health = self.img[
+                    self.top_left[1]:self.bottom_right[1],
+                    self.top_left[0]:self.bottom_right[0]
+                    ]
 
                 if self.enable_cv_preview:
                     small = cv.resize(self.img, (0, 0), fx=0.5, fy=0.5)
