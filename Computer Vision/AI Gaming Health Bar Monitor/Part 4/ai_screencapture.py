@@ -11,6 +11,7 @@ class ScreenCaptureAgent:
     def __init__(self) -> None:
         self.img = None
         self.img_health = None
+        self.img_health_HSV = None
         self.capture_process = None
         self.fps = None
         self.enable_cv_preview = True
@@ -36,6 +37,9 @@ class ScreenCaptureAgent:
                     self.top_left[1]:self.bottom_right[1],
                     self.top_left[0]:self.bottom_right[0]
                 ]
+                self.img_health_HSV = cv.cvtColor(self.img_health, cv.COLOR_BGR2HSV)
+                health_ratio = hue_match_pct(self.img_health_HSV, 80, 115)
+                health_ratio *= 100
 
                 if self.enable_cv_preview:
                     small = cv.resize(self.img, (0, 0), fx=0.5, fy=0.5)
@@ -51,7 +55,20 @@ class ScreenCaptureAgent:
                         1,
                         (255, 0, 255),
                         1,
-                        cv.LINE_AA)
+                        cv.LINE_AA
+                        )
+
+                    cv.putText(
+                        small,
+                        "Health: " + str(health_ratio),
+                        (25, 100),
+                        cv.FONT_HERSHEY_DUPLEX,
+                        1,
+                        (0, 0, 255),
+                        1,
+                        cv.LINE_AA,
+                        )
+
                     cv.imshow("Computer Vision", small)
                     cv.imshow("Health Bar", self.img_health)
 
@@ -73,6 +90,23 @@ class bcolors:
     RED = '\033[91m'
     YELLOW = '\033[93m'
     ENDC = '\033[0m'
+
+
+def convert_hue(hue):
+    ratio = 361 / 180
+    return np.round(hue / ratio, 2)
+
+def hue_match_pct(img, hue_low, hue_high):
+    match_pixels = 0
+    no_match_pixels = 0
+    for pixel in img:
+        for h, s, v in pixel:
+            if convert_hue(hue_low) < h < convert_hue(hue_high):
+                match_pixels += 1
+            else:
+                no_match_pixels += 1
+    total_pixels = match_pixels + no_match_pixels
+    return np.round(match_pixels / total_pixels, 2)
 
 
 def print_menu():
