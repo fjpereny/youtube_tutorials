@@ -6,6 +6,8 @@ import numpy as np
 import time
 import multiprocessing
 
+import healbot
+
 
 class ScreenCaptureAgent:
     def __init__(self) -> None:
@@ -102,7 +104,14 @@ def hue_match_pct(img, hue_low, hue_high):
             else:
                 no_match_pixels +=1
     total_pixels = match_pixels + no_match_pixels
-    return np.round(match_pixels / total_pixels, 2) * 100
+    pct_health = np.round(match_pixels / total_pixels, 2) * 100
+
+    if pct_health <= 50:
+        healbot.cast_spell('big_heal')
+    elif pct_health <= 70:
+        healbot.cast_spell('small_heal')
+
+    return pct_health
 
 
 def print_menu():
@@ -141,3 +150,5 @@ if __name__ == "__main__":
             print(f"{bcolors.RED}ERROR:{bcolors.ENDC} Unknown command.")
 
 print("Done.")
+
+
