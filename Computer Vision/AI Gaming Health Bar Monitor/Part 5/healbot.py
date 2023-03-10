@@ -11,7 +11,7 @@ spells = {
 
 def cast_spell(spell_name):
     key = spells[spell_name]
-    pyautogui.press(key)
+    # pyautogui.press(key)
     print(f"Casting {spell_name}...")
 
 

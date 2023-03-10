@@ -7,6 +7,7 @@ import time
 import multiprocessing
 
 import healbot
+import map_reader
 
 
 class ScreenCaptureAgent:
@@ -18,8 +19,10 @@ class ScreenCaptureAgent:
         self.fps = None
         self.enable_cv_preview = True
 
-        self.top_left = (514, 771)
-        self.bottom_right = (635, 788)
+        self.location_text = None
+
+        self.top_left = (459, 733)
+        self.bottom_right = (594, 751)
 
         self.w, self.h = pyautogui.size()
         print("Screen Resolution: " + "w: " + str(self.w) + " h:" + str(self.h))
@@ -40,6 +43,8 @@ class ScreenCaptureAgent:
                     self.top_left[0]:self.bottom_right[0]
                 ]
 
+                self.location_text = map_reader.get_cur_zone(self.img) 
+                print(self.location_text)               
                 self.img_health_HSV = cv.cvtColor(self.img_health, cv.COLOR_BGR2HSV)
 
                 if self.enable_cv_preview:
@@ -66,6 +71,15 @@ class ScreenCaptureAgent:
                         (0, 0, 255),
                         1,
                         cv.LINE_AA)
+                    cv.putText(
+                        small, 
+                        f"Zone: {self.location_text}", 
+                        (25, 150), 
+                        cv.FONT_HERSHEY_DUPLEX,
+                        1,
+                        (0, 255, 255),
+                        1,
+                        cv.LINE_AA)
                     cv.imshow("Computer Vision", small)
                     cv.imshow("Health Bar", self.img_health)
 
@@ -77,6 +91,7 @@ class ScreenCaptureAgent:
                     n_frames = 1
                 n_frames += 1
                 cv.waitKey(1)
+
 
 
 class bcolors:
