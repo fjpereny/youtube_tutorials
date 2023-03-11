@@ -19,7 +19,7 @@ class ScreenCaptureAgent:
         self.fps = None
         self.enable_cv_preview = True
 
-        self.location_text = None
+        self.zone = None
 
         self.top_left = (459, 733)
         self.bottom_right = (594, 751)
@@ -38,13 +38,14 @@ class ScreenCaptureAgent:
                 self.img = sct.grab(monitor=self.monitor)
                 self.img = np.array(self.img)
 
+                self.zone = map_reader.get_cur_zone(self.img)
+                self.zone = self.zone.lower().strip()
+
                 self.img_health = self.img[
                     self.top_left[1]:self.bottom_right[1],
                     self.top_left[0]:self.bottom_right[0]
                 ]
 
-                self.location_text = map_reader.get_cur_zone(self.img) 
-                print(self.location_text)               
                 self.img_health_HSV = cv.cvtColor(self.img_health, cv.COLOR_BGR2HSV)
 
                 if self.enable_cv_preview:
@@ -73,13 +74,14 @@ class ScreenCaptureAgent:
                         cv.LINE_AA)
                     cv.putText(
                         small, 
-                        f"Zone: {self.location_text}", 
+                        "Zone: " + self.zone, 
                         (25, 150), 
                         cv.FONT_HERSHEY_DUPLEX,
                         1,
                         (0, 255, 255),
                         1,
                         cv.LINE_AA)
+                    
                     cv.imshow("Computer Vision", small)
                     cv.imshow("Health Bar", self.img_health)
 
