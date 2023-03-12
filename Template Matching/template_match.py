@@ -1,7 +1,6 @@
 
 
 import cv2
-import numpy as np
 
 
 original = cv2.imread('./Template Matching/mario_ss.png')
