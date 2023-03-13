@@ -21,6 +21,11 @@ class ScreenCaptureAgent:
 
         self.zone = None
 
+        self.enable_nav = True
+        self.nav_target = cv.imread('target.png')
+        self.nav_loc = None
+        self.nav_loc_match = None
+
         self.top_left = (459, 733)
         self.bottom_right = (594, 751)
 
@@ -37,6 +42,7 @@ class ScreenCaptureAgent:
             while True:
                 self.img = sct.grab(monitor=self.monitor)
                 self.img = np.array(self.img)
+                self.img = cv.cvtColor(self.img, cv.COLOR_BGRA2BGR)
 
                 self.zone = map_reader.get_cur_zone(self.img)
                 self.zone = self.zone.lower().strip()
@@ -47,6 +53,14 @@ class ScreenCaptureAgent:
                 ]
 
                 self.img_health_HSV = cv.cvtColor(self.img_health, cv.COLOR_BGR2HSV)
+
+                if self.enable_nav:      
+                        nav_loc = cv.matchTemplate(self.img, self.nav_target, cv.TM_CCOEFF_NORMED)
+                        min_val, max_val, min_loc, max_loc = cv.minMaxLoc(nav_loc)
+                        self.nav_loc = max_loc
+                        self.nav_loc_match = np.round(max_val * 100, 2)
+                        if self.nav_loc_match <= 85:
+                            self.nav_loc = None
 
                 if self.enable_cv_preview:
                     small = cv.resize(self.img, (0, 0), fx=0.5, fy=0.5)
@@ -80,10 +94,21 @@ class ScreenCaptureAgent:
                         1,
                         (0, 255, 255),
                         1,
+                        cv.LINE_AA)   
+                    if self.enable_nav:
+                        cv.putText(
+                        small, 
+                        "Nav Target: " + str(self.nav_loc) + f" {self.nav_loc_match}%", 
+                        (25, 200), 
+                        cv.FONT_HERSHEY_DUPLEX,
+                        1,
+                        (0, 255, 0),
+                        1,
                         cv.LINE_AA)
                     
                     cv.imshow("Computer Vision", small)
                     cv.imshow("Health Bar", self.img_health)
+
 
                 elapsed_time = time.time() - fps_report_time
                 if elapsed_time >= fps_report_delay:
