@@ -8,6 +8,12 @@ import multiprocessing
 
 import healbot
 import map_reader
+import nav
+import move
+
+
+SHOW_COMP_VISION_WINDOW = True
+SHOW_HEALTH_BAR_WINDOW = False
 
 
 class ScreenCaptureAgent:
@@ -106,10 +112,46 @@ class ScreenCaptureAgent:
                         (0, 255, 0),
                         1,
                         cv.LINE_AA)   
+                        if self.nav_loc:
+                            turn_angle = np.round(nav.get_nav_turn_angle(self.nav_loc) * 180 / 3.14, 2)
+                            pitch_angle = None
+                            cv.putText(
+                            small, 
+                            "Nav Rotate Angle: " + str(turn_angle) + " deg", 
+                            (25, 250), 
+                            cv.FONT_HERSHEY_DUPLEX,
+                            1,
+                            (0, 255, 0),
+                            1,
+                            cv.LINE_AA)
+                        
+                            if turn_angle > 10:
+                                move.bump_left(0.01)
+                            elif turn_angle < -10:
+                                move.bump_right(0.01)
+                            
+                            pitch_angle = np.round(nav.get_nav_elevation_ratio(self.nav_loc) * 180 / 3.14, 2)
+                            cv.putText(
+                            small, 
+                            "Nav Pitch Ratio: " + str(pitch_angle) + " deg", 
+                            (25, 300), 
+                            cv.FONT_HERSHEY_DUPLEX,
+                            1,
+                            (0, 255, 0),
+                            1,
+                            cv.LINE_AA)
+                        
+                            # if pitch_angle > 10:
+                            #     move.bump_left(0.01)
+                            # elif pitch_angle < -10:
+                            #     move.bump_right(0.01)
                     
                     
-                    cv.imshow("Computer Vision", small)
-                    cv.imshow("Health Bar", self.img_health)
+                    if SHOW_COMP_VISION_WINDOW:
+                        cv.imshow("Computer Vision", small)
+
+                    if SHOW_HEALTH_BAR_WINDOW:
+                        cv.imshow("Health Bar", self.img_health)
 
 
                 elapsed_time = time.time() - fps_report_time
